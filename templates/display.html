@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据展示 - 爱奇艺数据管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 左侧导航栏 - 只显示剧名 -->
+            <nav class="col-md-3 sidebar">
+                <div class="sidebar-sticky">
+                    <h4 class="mb-4">爱奇艺数据管理</h4>
+                    <ul class="nav flex-column mb-4">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-home mr-2"></i>首页
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/scrape">
+                                <i class="fas fa-spider mr-2"></i>数据爬取
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/display">
+                                <i class="fas fa-table mr-2"></i>数据展示
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            数据选择
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="fileSelect">选择数据文件</label>
+                                <select class="form-control" id="fileSelect">
+                                    <option value="">请选择...</option>
+                                </select>
+                            </div>
+                            <div id="fileInfo" class="small text-muted mt-2"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>热剧列表</span>
+                            <span class="badge badge-pill badge-primary" id="videoCount">0</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="videoList" class="list-group list-group-flush">
+                                <div class="list-group-item text-muted text-center py-4">
+                                    请先选择数据文件
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <button id="getRecommendationsBtn" class="btn btn-success btn-block">
+                                <i class="fas fa-magic mr-2"></i>获取推荐视频
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- 右侧主内容区 - 显示完整信息 -->
+            <main class="col-md-9 ml-sm-auto main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-table mr-2"></i>剧集详情</h2>
+                    <div id="searchBox" class="form-inline" style="display: none;">
+                        <input type="text" class="form-control mr-2" placeholder="搜索剧集..." id="searchInput">
+                        <button class="btn btn-outline-secondary" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 主内容区域 - 分为左右两部分 -->
+                <div class="row">
+                    <!-- 左侧内容区 - 剧照和基本信息 -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <h3 id="videoTitle" class="mb-4 text-center">请选择剧集</h3>
+                                <a id="posterLink" href="#" target="_blank">
+                                    <img id="videoPoster" src="/static/default-poster.svg" 
+                                        class="card-img-top img-fluid rounded" 
+                                        alt="剧集海报"
+                                        style="max-height: 500px; object-fit: cover;"
+                                        onerror="this.src='/static/default-poster.svg'">
+                                </a>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge badge-primary rating-badge mr-2" id="videoRating">
+                                            无评分
+                                        </span>
+                                        <small class="text-muted" id="ratingCount">(0人评价)</small>
+                                    </div>
+                                    <a href="#" id="watchLink" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-play mr-1"></i>立即观看
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5><i class="fas fa-info-circle mr-2"></i>剧情简介</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text description-content" id="videoDescription" style="max-height: 200px; overflow-y: auto;">
+                                    请从左侧选择剧集查看详情
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5><i class="fas fa-users mr-2"></i>演职人员</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="videoCast" class="cast-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧内容区 - 详情和评论 -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-comments mr-2"></i>热门评论</h5>
+                                <span class="badge badge-pill badge-info" id="commentCount">0条</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="videoComments" class="comment-list" style="height: calc(100vh - 200px); overflow-y: auto;">
+                                    <div class="alert alert-info m-3">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        请选择剧集查看评论
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 相关推荐区域 -->
+                <div class="row mt-4" id="recommendationsContainer" style="display: none;">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-thumbs-up mr-2"></i>相关推荐</h5>
+                                <span class="badge badge-pill badge-info" id="recommendCount">0条</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="recommendationsList" class="row">
+                                    <!-- 推荐内容将在这里动态加载 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+                
+                <!-- 评论区
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-comments mr-2"></i>热门评论</h4>
+                        <span class="badge badge-pill badge-info" id="commentCount">0条</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="videoComments" class="comment-list">
+                            <div class="alert alert-info m-3">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                请选择剧集查看评论
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600">
+  <rect width="400" height="600" fill="#f5f5f5"/>
+  <path d="M200 250c-27.6 0-50 22.4-50 50s22.4 50 50 50 50-22.4 50-50-22.4-50-50-50zm0 80c-16.5 0-30-13.5-30-30s13.5-30 30-30 30 13.5 30 30-13.5 30-30 30z" fill="#bdbdbd"/>
+  <path d="M320 180H80c-11 0-20 9-20 20v200c0 11 9 20 20 20h240c11 0 20-9 20-20V200c0-11-9-20-20-20zm0 220H80V200h240v200z" fill="#bdbdbd"/>
+  <text x="200" y="500" text-anchor="middle" font-family="Arial" font-size="24" fill="#757575">暂无海报</text>
+</svg>

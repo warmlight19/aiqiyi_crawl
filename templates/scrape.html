@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据爬取 - 爱奇艺数据管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            width: 250px;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        #scrapeContainer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .progress-container {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border .75s linear infinite;
+        }
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 sidebar">
+                <div class="sidebar-sticky">
+                    <h4 class="mb-4">爱奇艺数据管理</h4>
+                    <ul class="nav flex-column mb-4">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-home mr-2"></i>首页
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/scrape">
+                                <i class="fas fa-spider mr-2"></i>数据爬取
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/display">
+                                <i class="fas fa-table mr-2"></i>数据展示
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            爬取控制
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="videoCount">爬取视频数量</label>
+                                <input type="number" class="form-control" id="videoCount" value="3" min="1" max="20">
+                            </div>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="headlessMode">
+                                    <label class="custom-control-label" for="headlessMode">无头模式</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="autoUpdate">
+                                    <label class="custom-control-label" for="autoUpdate">自动更新</label>
+                                </div>
+                                <div id="updateIntervalGroup" class="mt-2" style="display: none;">
+                                    <label for="updateInterval">更新间隔（分钟）</label>
+                                    <input type="number" class="form-control" id="updateInterval" value="30" min="30">
+                                </div>
+                            </div>
+                            <button id="startScrapingBtn" class="btn btn-primary btn-block">
+                                <i class="fas fa-play mr-2"></i>开始爬取
+                            </button>
+                            <button id="stopScrapingBtn" class="btn btn-danger btn-block mt-2" disabled>
+                                <i class="fas fa-stop mr-2"></i>停止爬取
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            历史记录
+                        </div>
+                        <div class="card-body small">
+                            <div id="historyList"></div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ml-sm-auto main-content">
+                <div id="scrapeContainer">
+                    <h2><i class="fas fa-spider mr-2"></i>数据爬取</h2>
+                    <p class="lead">从爱奇艺网站获取热播剧集数据</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        此操作将自动爬取爱奇艺热播剧集数据，包括剧集信息、评分和评论等内容。
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-terminal mr-2"></i>爬取日志
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container" id="progressLog">
+                                <div class="log-entry text-muted">准备就绪，点击"开始爬取"按钮开始...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.0.1/dist/socket.io.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="/static/js/scrape.js"></script>
+</body>
+</html>
